@@ -2,9 +2,7 @@ config = {
   # This is the list of users to generate.
   # Every device must have a unique username.
   vpn_users = [
-    "phone",
-    "laptop",
-    "desktop"
+    "vpn"
   ]
 
   # Deploy StrongSwan to enable IPsec support
@@ -87,7 +85,7 @@ config = {
   max_mss = 0
 
   # Block traffic between connected clients
-  drop_traffic_between_clients = true
+  drop_traffic_between_clients = false
 
   # StrongSwan log level
   # https://wiki.strongswan.org/projects/strongswan/wiki/LoggerConfiguration
@@ -99,7 +97,7 @@ config = {
   # which case a reboot will take place if necessary at the time specified (as
   # HH:MM) in the time zone of your Algo server. The default time zone is UTC.
   unattended_reboot = {
-    enabled = false
+    enabled = true
     time    = "06:00"
   }
 
@@ -118,30 +116,30 @@ config = {
 
   clouds = {
     azure = {
-      image  = "19.04"
+      image  = "20_04-daily-lts"
       size   = "Standard_B1S"
-      region = "eastus"
+      region = "westeurope"
     }
 
     digitalocean = {
-      image  = "ubuntu-19-04-x64"
+      image  = "ubuntu-20-04-x64"
       size   = "s-1vcpu-1gb"
-      region = "nyc1"
+      region = "fra1"
     }
 
     ec2 = {
       # Change the encrypted flag to "true" to enable AWS volume encryption, for encryption of data at rest.
       encrypted  = true
       kms_key_id = ""
-      image      = "ubuntu-disco-19.04"
+      image      = "ubuntu-focal-20.04"
       size       = "t2.micro"
-      region     = "us-east-1"
+      region     = "eu-central-1"
     }
 
     gce = {
-      image  = "ubuntu-os-cloud/ubuntu-1904"
+      image  = "ubuntu-os-cloud/ubuntu-2004-lts"
       size   = "f1-micro"
-      region = "us-east1"
+      region = "europe-west3"
     }
   }
 }

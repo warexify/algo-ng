@@ -34,7 +34,7 @@ variable "ondemand_wifi_exclude" {
 }
 
 variable "dns_adblocking" {
-  default     = false
+  default     = true
   description = <<-EOF
                   Do you want to install an ad blocking DNS resolver on this VPN server?
                   [y/N]
@@ -42,7 +42,7 @@ variable "dns_adblocking" {
 }
 
 variable "ssh_tunneling" {
-  default     = false
+  default     = true
   description = <<-EOF
                   Do you want each user to have their own account for SSH tunneling?
                   [y/N]

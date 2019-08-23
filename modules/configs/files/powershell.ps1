@@ -29,6 +29,9 @@ Note that this must be passed in as a SecureString, not a regular string.
 You can create a secure string with the `Read-Host -AsSecureString` cmdlet.
 See the examples for more information.
 
+.PARAMETER AllUsers
+Allow all users to use the VPN
+
 .EXAMPLE
 client_USER.ps1 -Add
 
@@ -56,12 +59,15 @@ client_USER.ps1 -SaveCerts -OutputDirectory $$Home\Downloads
 
 Save the embedded CA cert and encrypted user PKCS12 file.
 #>
-[CmdletBinding(DefaultParameterSetName="Add")] Param(
-    [Parameter(ParameterSetName="Add")]
+[CmdletBinding(DefaultParameterSetName = "Add")] Param(
+    [Parameter(ParameterSetName = "Add")]
     [Switch] $$Add,
 
     [Parameter(ParameterSetName="Add")]
     [SecureString] $$Pkcs12DecryptionPassword,
+
+    [Parameter(ParameterSetName="Add")]
+    [Switch] $AllUsers = $false,
 
     [Parameter(Mandatory, ParameterSetName="Remove")]
     [Switch] $$Remove,
@@ -108,13 +114,13 @@ Retrieve any installed Algo VPN certificates
 function Get-InstalledAlgoVpnCertificates {
     [CmdletBinding()] Param()
     Get-ChildItem -LiteralPath Cert:\LocalMachine\Root |
-        Where-Object {
-            $$_.Subject -match "^CN=$${VpnServerAddress}$$" -and $$_.Issuer -match "^CN=$${VpnServerAddress}$$"
-        }
+    Where-Object {
+        $$_.Subject -match "^CN=$${VpnServerAddress}$$" -and $$_.Issuer -match "^CN=$${VpnServerAddress}$$"
+    }
     Get-ChildItem -LiteralPath Cert:\LocalMachine\My |
-        Where-Object {
-            $$_.Subject -match "^CN=$${VpnUser}$$" -and $$_.Issuer -match "^CN=$${VpnServerAddress}$$"
-        }
+    Where-Object {
+        $$_.Subject -match "^CN=$${VpnUser}$$" -and $$_.Issuer -match "^CN=$${VpnServerAddress}$$"
+    }
 }
 
 function Save-AlgoVpnCertificates {
@@ -150,7 +156,7 @@ function Add-AlgoVPN {
         }
         Import-PfxCertificate @importPfxCertParams
         $$importCertParams = @{
-            FilePath =  $$certs.CaPem
+            FilePath = $$certs.CaPem
             CertStoreLocation = "Cert:\LocalMachine\Root"
         }
         Import-Certificate @importCertParams
@@ -164,8 +170,15 @@ function Add-AlgoVPN {
         TunnelType = "IKEv2"
         AuthenticationMethod = "MachineCertificate"
         EncryptionLevel = "Required"
+        AllUserConnection = $$AllUsers
     }
     Add-VpnConnection @addVpnParams
+
+    $$addVpnRouteParams = @{
+        ConnectionName = $$VpnName
+    }
+    Add-VpnConnectionRoute @addVpnRouteParams -DestinationPrefix ::/1
+    Add-VpnConnectionRoute @addVpnRouteParams -DestinationPrefix 8000::/1
 
     $$setVpnParams = @{
         ConnectionName = $$VpnName

@@ -57,7 +57,7 @@
                   <key>IntegrityAlgorithm</key>
                   <string>SHA2-512</string>
                   <key>LifeTimeInMinutes</key>
-                  <integer>20</integer>
+                  <integer>1440</integer>
               </dict>
               <key>DeadPeerDetectionRate</key>
               <string>Medium</string>
@@ -78,7 +78,7 @@
                   <key>IntegrityAlgorithm</key>
                   <string>SHA2-512</string>
                   <key>LifeTimeInMinutes</key>
-                  <integer>20</integer>
+                  <integer>1440</integer>
               </dict>
               <key>LocalIdentifier</key>
               <string>${var.vpn_users[index]}</string>
@@ -91,7 +91,7 @@
               <key>RemoteAddress</key>
               <string>${var.server_address}</string>
               <key>RemoteIdentifier</key>
-              <string>algo.vpn</string>
+              <string>algo.istratov.ml</string>
               <key>UseConfigurationAttributeInternalIPSubnet</key>
               <integer>0</integer>
             </dict>

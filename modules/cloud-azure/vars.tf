@@ -16,7 +16,7 @@ variable "wireguard_network" {
 }
 
 variable "image" {
-  default = "18.04-LTS"
+  default = "20.04-LTS"
 }
 
 variable "size" {

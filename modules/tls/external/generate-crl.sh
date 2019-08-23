@@ -19,24 +19,23 @@ crl_extensions=crl_ext
 [ crl_ext ]
 authorityKeyIdentifier=keyid:always,issuer:always"
 
-
-[ -f index.txt ]  || touch index.txt
-[ -f crlnumber ]  || echo 00 > crlnumber
-[ -f crl.pem ]    || openssl ca -gencrl -keyfile <(echo "$CA_KEY") -cert <(echo "$CA_CERT") -out crl.pem -config <(echo "$OPENSSLCNF")
+[ -f index.txt ] || touch index.txt
+[ -f crlnumber ] || echo 00 > crlnumber
+[ -f crl.pem ] || openssl ca -gencrl -keyfile <(echo "$CA_KEY") -cert <(echo "$CA_CERT") -out crl.pem -config <(echo "$OPENSSLCNF")
 
 cp -f users.txt users.txt.old || true
 echo "$USERS" > users.txt
 
-cat users.txt.old | while read userOld; do
-  if grep -Ew "^${userOld}$" users.txt >/dev/null; then
+cat users.txt.old | while read -r userOld; do
+  if grep -Ew "^${userOld}$" users.txt > /dev/null; then
     :
   else
     openssl ca -gencrl \
       -config <(echo "$OPENSSLCNF") \
       -keyfile <(echo "$CA_KEY") \
       -cert <(echo "$CA_CERT") \
-      -revoke .for_crl/$userOld.crt.pem \
-      -out .for_crl/$userOld.crt.pem_revoked
+      -revoke .for_crl/"$userOld.crt.pem" \
+      -out .for_crl/"$userOld.crt.pem_revoked"
     openssl ca -gencrl \
       -config <(echo "$OPENSSLCNF") \
       -keyfile <(echo "$CA_KEY") \

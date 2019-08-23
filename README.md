@@ -2,7 +2,7 @@
 
 [![Join the chat at https://gitter.im/trailofbits/algo](https://badges.gitter.im/trailofbits/algo.svg)](https://gitter.im/trailofbits/algo?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Twitter](https://img.shields.io/twitter/url/https/twitter.com/fold_left.svg?style=social&label=Follow%20%40AlgoVPN)](https://twitter.com/AlgoVPN)
-[![TravisCI Status](https://api.travis-ci.com/trailofbits/algo-ng.svg?branch=master)](https://travis-ci.com/trailofbits/algo-ng)
+[![TravisCI Status](https://api.travis-ci.com/warexify/algo-ng.svg?branch=develop)](https://travis-ci.com/warexify/algo-ng)
 
 Algo VPN is a set of Terraform files that simplify the setup of a personal VPN. It uses the most secure defaults available, works with common cloud providers, and does not require client software on most devices. See our [release announcement](https://blog.trailofbits.com/2016/12/12/meet-algo-the-vpn-that-works/) for more information.
 
@@ -31,7 +31,7 @@ The easiest way to get an Algo server running is to let it set up a _new_ virtua
 
 1. **Setup an account on a cloud hosting provider.** Algo supports [DigitalOcean](https://m.do.co/c/4d7f4ff9cfe4) (most user friendly), [Amazon EC2](https://aws.amazon.com/), [Google Compute Engine](https://cloud.google.com/compute/), and [Microsoft Azure](https://azure.microsoft.com/).
 
-2. **[Download Algo](https://github.com/trailofbits/algo-ng/archive/master.zip).** Unzip it in a convenient location on your local machine.
+2. **[Download Algo](https://github.com/warexify/algo-ng/archive/develop.zip).** Unzip it in a convenient location on your local machine.
 
 3. **Install Algo's core dependencies.** Open the Terminal.
 

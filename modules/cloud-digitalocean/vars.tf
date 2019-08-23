@@ -14,7 +14,7 @@ variable "wireguard_network" {
 }
 
 variable "image" {
-  default = "ubuntu-19-04-x64"
+  default = "ubuntu-20-04-x64"
 }
 
 variable "size" {

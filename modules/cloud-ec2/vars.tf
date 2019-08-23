@@ -15,7 +15,7 @@ variable "wireguard_network" {
 }
 
 variable "image" {
-  default = "ubuntu-disco-19.04"
+  default = "ubuntu-focal-20.04"
 }
 
 variable "size" {

@@ -7,10 +7,10 @@ resource "tls_cert_request" "server" {
   key_algorithm   = "ECDSA"
   private_key_pem = tls_private_key.server.private_key_pem
   ip_addresses    = [var.server_address]
-  dns_names       = ["algo.vpn"]
+  dns_names       = ["algo.istratov.ml"]
 
   subject {
-    common_name = "algo.vpn"
+    common_name = "algo.istratov.ml"
   }
 }
 

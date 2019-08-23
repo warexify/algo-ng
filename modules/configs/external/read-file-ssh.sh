@@ -2,7 +2,7 @@
 
 set -ex
 
-SSH="$(which ssh)"
+SSH="$(command -v ssh)"
 SSH_ARGS="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
 ADDRESS="$1"
 KEY="$2"
@@ -10,7 +10,7 @@ FILE="$3"
 WAIT="${4:-false}"
 
 connect() {
-  $SSH -i "${KEY}" ${SSH_ARGS} ${ADDRESS} $1
+  $SSH -i "${KEY}" "${SSH_ARGS}" "${ADDRESS}" "$1"
 }
 
 wait() {
@@ -25,6 +25,6 @@ if [[ "${WAIT}" == "wait" ]]; then
   wait
 fi
 
-read
+read -r
 
 printf '{"result": "%s"}\n' "$FILE"

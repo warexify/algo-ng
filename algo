@@ -1,129 +1,129 @@
 #!/usr/bin/env bash
 
-SENSITIVE_PROMPT="[pasted values will not be displayed]"
-TRUE="^(y|Y|true)$"
-REGIONS_PATH="./regions"
+export SENSITIVE_PROMPT="[pasted values will not be displayed]"
+export TRUE="^(y|Y|true)$"
+export REGIONS_PATH="./regions"
 
-describeRegions(){
+describeRegions() {
   index=1
-  while IFS="," read code name default; do
+  while IFS="," read -r code name default; do
     printf "\n%2s. %-${ALGN:-5}s %s" $index "$code" "$name"
     ((index++))
-  done < ${REGIONS_PATH}/${1}
+  done < "${REGIONS_PATH}/${1}"
 }
 
-getRegionCodeByIndex(){
-  sed "${2}q;d" ${REGIONS_PATH}/${1} | cut -f1 -d,
+getRegionCodeByIndex() {
+  sed "${2}q;d" "${REGIONS_PATH}/${1}" | cut -f1 -d,
 }
 
-getDefaultRegion(){
+getDefaultRegion() {
   index=1
-  while IFS="," read code name default; do
+  while IFS="," read -r code name default; do
     if [[ "$default" == "default" ]]; then
       default=${index}
       echo "$default"
       break
     fi
     ((index++))
-  done < ${REGIONS_PATH}/${1}
-
+  done < "${REGIONS_PATH}/${1}"
 }
 
-askForRegion(){
-  local default="$(getDefaultRegion ${ALGO_PROVIDER})"
+askForRegion() {
+  local default
+  default="$(getDefaultRegion "${ALGO_PROVIDER}")"
   echo -e "\nWhat region should the server be located in?" \
-    "\n$(describeRegions $1)" \
+    "\n$(describeRegions "$1")" \
     "\nEnter the number of your desired region:"
   read -p "[${default}]: " -r region
   region=${region:-$default}
-  TF_VAR_region="$(getRegionCodeByIndex "$1" $region)"
+  TF_VAR_region="$(getRegionCodeByIndex "$1" "$region")"
 }
 
-azure () {
-  if [[ -z $ALGO_REGION && "$ALGO_COMMAND" == "apply"  ]]; then
-    askForRegion ${ALGO_PROVIDER}
+azure() {
+  if [[ -z $ALGO_REGION && "$ALGO_COMMAND" == "apply" ]]; then
+    askForRegion "${ALGO_PROVIDER}"
   else
     TF_VAR_region="$ALGO_REGION"
   fi
 
-  export  ARM_SUBSCRIPTION_ID=$ARM_SUBSCRIPTION_ID \
-          ARM_CLIENT_ID=$ARM_CLIENT_ID \
-          ARM_CLIENT_SECRET=$ARM_CLIENT_SECRET \
-          ARM_TENANT_ID=$ARM_TENANT_ID \
-          ALGO_SERVER_NAME=${ALGO_SERVER_NAME}
+  export ARM_SUBSCRIPTION_ID=$ARM_SUBSCRIPTION_ID \
+    ARM_CLIENT_ID=$ARM_CLIENT_ID \
+    ARM_CLIENT_SECRET=$ARM_CLIENT_SECRET \
+    ARM_TENANT_ID=$ARM_TENANT_ID \
+    ALGO_SERVER_NAME=${ALGO_SERVER_NAME}
 }
 
-digitalocean () {
+digitalocean() {
   if [[ -z $DIGITALOCEAN_TOKEN ]]; then
     echo -e "\nEnter your API token. The token must have read and write permissions" \
-            "(https://cloud.digitalocean.com/settings/api/tokens):" \
-            "\n$SENSITIVE_PROMPT"
+      "(https://cloud.digitalocean.com/settings/api/tokens):" \
+      "\n$SENSITIVE_PROMPT"
     read -p ": " -rs DIGITALOCEAN_TOKEN
   fi
 
   if [[ -z $ALGO_REGION && "$ALGO_COMMAND" == "apply" ]]; then
-    askForRegion ${ALGO_PROVIDER}
+    askForRegion "${ALGO_PROVIDER}"
   else
     TF_VAR_region="$ALGO_REGION"
   fi
 
-  export  DIGITALOCEAN_TOKEN=$DIGITALOCEAN_TOKEN \
-          ALGO_SERVER_NAME=${ALGO_SERVER_NAME}
+  export DIGITALOCEAN_TOKEN=$DIGITALOCEAN_TOKEN \
+    ALGO_SERVER_NAME=${ALGO_SERVER_NAME}
 }
 
-aws () {
+aws() {
   if [[ -z $AWS_ACCESS_KEY_ID && -z $AWS_PROFILE ]]; then
     echo -e "\nEnter your aws_access_key (http://docs.aws.amazon.com/general/latest/gr/managing-aws-access-keys.html)" \
-            "\nNote: Make sure to use an IAM user with an acceptable policy attached (see https://github.com/trailofbits/algo/blob/master/docs/deploy-from-terraform.md)." \
-            "\n$SENSITIVE_PROMPT" \
-            "\n[AKIA...]: "
+      "\nNote: Make sure to use an IAM user with an acceptable policy attached (see https://github.com/trailofbits/algo/blob/master/docs/deploy-from-terraform.md)." \
+      "\n$SENSITIVE_PROMPT" \
+      "\n[AKIA...]: "
     read -p ": " -rs AWS_ACCESS_KEY_ID
   fi
 
   if [[ -z $AWS_SECRET_ACCESS_KEY && -z $AWS_PROFILE ]]; then
     echo -e "\n\nEnter your aws_secret_key (http://docs.aws.amazon.com/general/latest/gr/managing-aws-access-keys.html)" \
-            "\n$SENSITIVE_PROMPT" \
-            "\n[ABCD...]: "
+      "\n$SENSITIVE_PROMPT" \
+      "\n[ABCD...]: "
     read -p ": " -rs AWS_SECRET_ACCESS_KEY
   fi
 
-  if [[ -z $ALGO_REGION && "$ALGO_COMMAND" == "apply"  ]]; then
-    ALGN=15 askForRegion ${ALGO_PROVIDER}
+  if [[ -z $ALGO_REGION && "$ALGO_COMMAND" == "apply" ]]; then
+    ALGN=7 askForRegion "${ALGO_PROVIDER}"
   else
     TF_VAR_region="$ALGO_REGION"
   fi
 
-  export  AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
-          AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
-          ALGO_SERVER_NAME=${ALGO_SERVER_NAME}
+  export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
+    AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
+    ALGO_SERVER_NAME=${ALGO_SERVER_NAME}
 }
 
-gce () {
+gce() {
   if [[ -z $GOOGLE_CREDENTIALS ]]; then
     echo -e "\nEnter the local path to your credentials JSON file" \
-            "(https://support.google.com/cloud/answer/6158849?hl=en&ref_topic=6262490#serviceaccounts)"
+      "(https://support.google.com/cloud/answer/6158849?hl=en&ref_topic=6262490#serviceaccounts)"
     read -p "[]: " -r GOOGLE_CREDENTIALS
   fi
 
-  if [[ -z $ALGO_REGION && "$ALGO_COMMAND" == "apply"  ]]; then
-    ALGN=25 askForRegion ${ALGO_PROVIDER}
+  if [[ -z $ALGO_REGION && "$ALGO_COMMAND" == "apply" ]]; then
+    ALGN=10 askForRegion "${ALGO_PROVIDER}"
   else
     TF_VAR_region="$ALGO_REGION"
   fi
 
-  export  GOOGLE_CREDENTIALS=$GOOGLE_CREDENTIALS \
-          TF_VAR_google_credentials=$GOOGLE_CREDENTIALS \
-          ALGO_SERVER_NAME=${ALGO_SERVER_NAME}
+  export GOOGLE_CREDENTIALS=$GOOGLE_CREDENTIALS \
+    TF_VAR_google_credentials=$GOOGLE_CREDENTIALS \
+    ALGO_SERVER_NAME=${ALGO_SERVER_NAME}
 }
 
-algo_provisioning () {
-  if [[ -z $ALGO_PROVIDER && "$ALGO_COMMAND" == "apply"  ]]; then
+algo_provisioning() {
+  if [[ -z $ALGO_PROVIDER && "$ALGO_COMMAND" == "apply" ]]; then
     echo -e "\nWhat provider would you like to use?\n" \
-            "\n 1. DigitalOcean" \
-            "\n 2. Amazon EC2" \
-            "\n 3. Microsoft Azure" \
-            "\n 4. Google Compute Engine" \
-            "\n\nEnter the number of your desired provider"
+      "\n 1. DigitalOcean" \
+      "\n 2. Amazon EC2" \
+      "\n 3. Microsoft Azure" \
+      "\n 4. Google Compute Engine" \
+      "\n\nEnter the number of your desired provider"
     read -p ": " -r ALGO_PROVIDER
   fi
 
@@ -136,29 +136,42 @@ algo_provisioning () {
   export ALGO_SERVER_NAME=${ALGO_SERVER_NAME:-${default}}
 
   case "$ALGO_PROVIDER" in
-    1|digitalocean) ALGO_PROVIDER=digitalocean; digitalocean; ;;
-    2|ec2) ALGO_PROVIDER=ec2; aws; ;;
-    3|azure) ALGO_PROVIDER=azure; azure; ;;
-    4|gce) ALGO_PROVIDER=gce; gce; ;;
-    *) exit 1 ;;
+    1 | digitalocean)
+      ALGO_PROVIDER=digitalocean
+      digitalocean
+      ;;
+    2 | ec2)
+      ALGO_PROVIDER=ec2
+      aws
+      ;;
+    3 | azure)
+      ALGO_PROVIDER=azure
+      azure
+      ;;
+    4 | gce)
+      ALGO_PROVIDER=gce
+      gce
+      ;;
+    *)
+      exit 1
+      ;;
   esac
 
-  export  TF_CLI_ARGS_apply+=" -auto-approve -parallelism=1" \
-          TF_VAR_algo_name="${ALGO_SERVER_NAME}" \
-          TF_VAR_algo_provider="${ALGO_PROVIDER}" \
-          TF_VAR_region="$TF_VAR_region"
-
+  export TF_CLI_ARGS_apply+=" -auto-approve -parallelism=1" \
+    TF_VAR_algo_name="${ALGO_SERVER_NAME}" \
+    TF_VAR_algo_provider="${ALGO_PROVIDER}" \
+    TF_VAR_region="$TF_VAR_region"
 
   if [[ "$ALGO_COMMAND" == "apply" ]]; then
-    ${TERRAFORM_BIN} workspace select ${ALGO_PROVIDER}-${TF_VAR_region}-${ALGO_SERVER_NAME} \
-      || ${TERRAFORM_BIN} workspace new ${ALGO_PROVIDER}-${TF_VAR_region}-${ALGO_SERVER_NAME}
+    ${TERRAFORM_BIN} workspace select "${ALGO_PROVIDER}-${TF_VAR_region}-${ALGO_SERVER_NAME}" ||
+      ${TERRAFORM_BIN} workspace new "${ALGO_PROVIDER}-${TF_VAR_region}-${ALGO_SERVER_NAME}"
     ${TERRAFORM_BIN} init cloud/$ALGO_PROVIDER/
   fi
 
-  ${TERRAFORM_BIN} ${ALGO_COMMAND:-apply} cloud/$ALGO_PROVIDER/
+  ${TERRAFORM_BIN} "${ALGO_COMMAND:-apply}" cloud/$ALGO_PROVIDER/
 }
 
-help () {
+help() {
   echo "Usage: $0 <command>
 
   The available commands for execution are listed below.
@@ -171,8 +184,8 @@ help () {
   exit 0
 }
 
-locate_terraform () {
-  export TERRAFORM_BIN=$(which ./terraform || which terraform)
+locate_terraform() {
+  TERRAFORM_BIN=$(command -v ./terraform || command -v terraform) && export TERRAFORM_BIN
   if [[ "$TERRAFORM_BIN" == "" ]]; then
     echo "
     Terraform binary is not found.
@@ -181,14 +194,14 @@ locate_terraform () {
   fi
 }
 
-apply () {
+apply() {
   locate_terraform
 
   export ALGO_COMMAND="apply"
   algo_provisioning
 }
 
-destroyResources () {
+destroyResources() {
   locate_terraform
 
   CURRENT_WORKSPACE="$(${TERRAFORM_BIN} workspace list | grep "^*" | awk '{print $2}')"
@@ -205,23 +218,30 @@ destroyResources () {
   ${TERRAFORM_BIN} workspace select "${WORKSPACE}" || exit 1
 
   export ALGO_COMMAND="destroy"
-  export ALGO_PROVIDER=$(echo $CURRENT_WORKSPACE | cut -f1 -d-)
+  ALGO_PROVIDER=$(echo "$CURRENT_WORKSPACE" | cut -f1 -d-) && export ALGO_PROVIDER
 
   algo_provisioning
 
   ${TERRAFORM_BIN} workspace select default
-  ${TERRAFORM_BIN} workspace delete ${WORKSPACE}
+  ${TERRAFORM_BIN} workspace delete "${WORKSPACE}"
 }
 
-destroy () {
+destroy() {
   locate_terraform
   destroyResources
 }
 
 case "$1" in
-  apply)         apply         ;;
-  destroy)       destroy       ;;
-  update-users)  update-users  ;;
-  get-terraform) get_terraform ;;
-  *)             help "$@"     ;;
+  apply)
+    apply
+    ;;
+  destroy)
+    destroy
+    ;;
+  update-users)
+    update-users
+    ;;
+  *)
+    help "$@"
+    ;;
 esac
